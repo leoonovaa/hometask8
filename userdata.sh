@@ -1,20 +1,16 @@
 #!/bin/bash
 
-# --- Update system ---
 apt update -y
 apt install -y apache2 openssl
 
-# --- Enable Apache ---
 systemctl enable apache2
 systemctl start apache2
 
 # --- Add website content ---
 echo "<h1 style='color:green;'>Hometask #8 — HTTPS works on Ubuntu 22.04!</h1>" > /var/www/html/index.html
 
-# --- Create folder for certificate ---
 mkdir -p /etc/ssl/mycert
 
-# --- Generate OpenSSL config file ---
 cat <<EOF > /etc/ssl/mycert/openssl.cnf
 [ req ]
 default_bits       = 2048
@@ -40,14 +36,12 @@ DNS.1 = localhost
 IP.1  = 127.0.0.1
 EOF
 
-# --- Generate TLS certificate ---
 openssl req -x509 -nodes -days 365 \
   -newkey rsa:2048 \
   -keyout /etc/ssl/mycert/self.key \
   -out /etc/ssl/mycert/self.crt \
   -config /etc/ssl/mycert/openssl.cnf
 
-# --- Configure HTTPS VirtualHost for Apache ---
 cat <<EOF > /etc/apache2/sites-available/ssl-site.conf
 <VirtualHost *:443>
     ServerAdmin admin@example.com
@@ -59,9 +53,7 @@ cat <<EOF > /etc/apache2/sites-available/ssl-site.conf
 </VirtualHost>
 EOF
 
-# Enable SSL module and site
 a2enmod ssl
 a2ensite ssl-site.conf
 
-# Restart Apache to apply changes
 systemctl restart apache2
