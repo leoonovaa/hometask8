@@ -6,8 +6,7 @@ apt install -y apache2 openssl
 systemctl enable apache2
 systemctl start apache2
 
-# --- Add website content ---
-echo "<h1 style='color:green;'>Hometask #8 — HTTPS works on Ubuntu 22.04!</h1>" > /var/www/html/index.html
+echo "<h1>Anna Leonova my hometask8</h1>" > /var/www/html/index.html
 
 mkdir -p /etc/ssl/mycert
 
