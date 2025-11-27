@@ -3,10 +3,11 @@
 apt update -y
 apt install -y apache2 openssl
 
-systemctl enable apache2
-systemctl start apache2
+rm -f /var/www/html/index.html
 
 echo "<h1>Anna Leonova my hometask8</h1>" > /var/www/html/index.html
+
+a2dissite 000-default.conf
 
 mkdir -p /etc/ssl/mycert
 
@@ -43,16 +44,25 @@ openssl req -x509 -nodes -days 365 \
 
 cat <<EOF > /etc/apache2/sites-available/ssl-site.conf
 <VirtualHost *:443>
-    ServerAdmin admin@example.com
     DocumentRoot /var/www/html
-
     SSLEngine on
     SSLCertificateFile /etc/ssl/mycert/self.crt
     SSLCertificateKeyFile /etc/ssl/mycert/self.key
 </VirtualHost>
 EOF
 
+cat <<EOF > /etc/apache2/sites-available/redirect.conf
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+EOF
+
 a2enmod ssl
+a2enmod rewrite
+
 a2ensite ssl-site.conf
+a2ensite redirect.conf
 
 systemctl restart apache2
